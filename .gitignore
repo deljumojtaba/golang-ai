@@ -1,0 +1,46 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, coverage
+*.test
+*.out
+coverage.out
+
+# Go build output (if you use `go build -o`)
+/bin/
+
+# Dependency directories (remove the comment if you vendor deps)
+/vendor/
+
+# Go workspace file
+go.work
+
+# Go modules
+**/go.sum
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+
+# Environment files
+.env
+
+# macOS
+.AppleDouble
+.LSOverride
+
+# Logs
+*.log
+
+# Misc
+thumbs.db
+
+# Add any local maze files you do not want tracked (optional)
+# maze-*.txt
