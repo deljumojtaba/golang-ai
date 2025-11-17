@@ -118,9 +118,10 @@ func main() {
 
 	if len(m.Solution.Actions) > 0 {
 		fmt.Println("Solution found:")
-		m.printMaze()
+		// m.printMaze()
 		fmt.Println("Steps to goal:", len(m.Solution.Cells))
 		fmt.Println("Time taken:", time.Since(startTime))
+		m.OutputImage("image.png")
 	} else {
 		fmt.Println("No solution found.")
 	}
@@ -136,28 +137,31 @@ func solveDFS(m *Maze) {
 }
 
 func (g *Maze) printMaze() {
-	solutionMap := make(map[Point]bool)
-	for _, cell := range g.Solution.Cells {
-		solutionMap[cell] = true
-	}
-
-	for i := 0; i < g.Height; i++ {
-		for j := 0; j < g.Width; j++ {
-			currentPoint := Point{i, j}
-			if currentPoint == g.Start {
-				fmt.Print("A")
-			} else if currentPoint == g.Goal {
-				fmt.Print("B")
-			} else if solutionMap[currentPoint] {
-				fmt.Print(".")
-			} else if g.Walls[i][j].wall {
+	for r, row := range g.Walls {
+		for c, col := range row {
+			if col.wall {
 				fmt.Print("#")
+			} else if g.Start.Row == col.State.Row && g.Start.Col == col.State.Col {
+				fmt.Print("A")
+			} else if g.Goal.Row == col.State.Row && g.Goal.Col == col.State.Col {
+				fmt.Print("B")
+			} else if g.inSolution(Point{r, c}) {
+				fmt.Print("*")
 			} else {
 				fmt.Print(" ")
 			}
 		}
 		fmt.Println()
 	}
+}
+
+func (g *Maze) inSolution(x Point) bool {
+	for _, step := range g.Solution.Cells {
+		if step.Col == x.Col && step.Row == x.Row {
+			return true
+		}
+	}
+	return false
 }
 
 func (g *Maze) Load(filename string) error {

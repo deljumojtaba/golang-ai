@@ -117,7 +117,7 @@ func (dfs *DepthFirstSearch) Solve() {
 			// Previously the code continued searching which could
 			// print "Goal reached!" multiple times and later
 			// print "No solution found" when the frontier emptied.
-			return
+			break
 		}
 
 		dfs.Game.Explored = append(dfs.Game.Explored, currentNode.State)
