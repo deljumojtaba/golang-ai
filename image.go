@@ -6,9 +6,11 @@ import (
 	"image/color"
 	"image/draw"
 	"image/png"
+	"log"
 	"os"
 
 	"github.com/StephaneBunel/bresenham"
+	"github.com/kettek/apng"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/basicfont"
 	"golang.org/x/image/math/fixed"
@@ -21,8 +23,8 @@ const cellSize = 60 // size of each cell in pixels
 
 var (
 	green     = color.RGBA{0, 255, 0, 255}     // color for start cell
-	darkGreen = color.RGBA{0, 155, 0, 255}     // color for goal cell
-	red       = color.RGBA{255, 0, 0, 255}     // color for walls
+	darkGreen = color.RGBA{0, 155, 0, 255}     // color for start cell
+	red       = color.RGBA{255, 0, 0, 255}     // color for goal cell
 	yellow    = color.RGBA{255, 255, 0, 255}   // color for explored cells
 	gray      = color.RGBA{200, 200, 200, 255} // color for empty cells
 	orange    = color.RGBA{255, 165, 0, 255}   // color for solution path
@@ -32,7 +34,9 @@ var (
 // output image
 
 func (g *Maze) OutputImage(filename ...string) {
-	imgWidth := cellSize * (g.Width - 1)
+	// Image width should include all columns. Use g.Width * cellSize
+	// (no -1), otherwise the rightmost column may get cropped.
+	imgWidth := cellSize * g.Width
 	imgHeight := cellSize * g.Height
 
 	var outFile = "image.png"
@@ -56,12 +60,14 @@ func (g *Maze) OutputImage(filename ...string) {
 			p := Point{Row: i, Col: j}
 			if col.wall {
 				g.drawSquare(col, p, img, color.Black, cellSize, j*cellSize, i*cellSize)
-			} else if g.inSolution(p) {
-				g.drawSquare(col, p, img, green, cellSize, j*cellSize, i*cellSize)
 			} else if col.State.Row == g.Start.Row && col.State.Col == g.Start.Col {
+				// draw start before solution so it remains visible
 				g.drawSquare(col, p, img, darkGreen, cellSize, j*cellSize, i*cellSize)
 			} else if col.State.Row == g.Goal.Row && col.State.Col == g.Goal.Col {
+				// draw goal before solution so it remains visible
 				g.drawSquare(col, p, img, red, cellSize, j*cellSize, i*cellSize)
+			} else if g.inSolution(p) {
+				g.drawSquare(col, p, img, green, cellSize, j*cellSize, i*cellSize)
 			} else if col.State == g.CurrentNode.State {
 				g.drawSquare(col, p, img, orange, cellSize, j*cellSize, i*cellSize)
 			} else if inExplored(Point{i, j}, g.Explored) {
@@ -112,4 +118,49 @@ func (g *Maze) printLocation(p Point, c color.Color, patch *image.RGBA) {
 	}
 
 	d.DrawString(fmt.Sprintf("[%d,%d]", p.Row, p.Col))
+}
+
+func (g *Maze) OutputAnimatedImage() {
+	output := "./animation.png"
+
+	files, _ := os.ReadDir("./tmp")
+
+	var images []string
+
+	for _, file := range files {
+		images = append(images, fmt.Sprintf("./tmp/%s", file.Name()))
+	}
+
+	images = append(images, "./image.png")
+
+	a := apng.APNG{
+		Frames: make([]apng.Frame, len(images)),
+	}
+
+	out, err := os.Create(output)
+	if err != nil {
+		log.Fatalf("failed to create output file: %v", err)
+	}
+	defer out.Close()
+
+	for i, imgPath := range images {
+		imgFile, err := os.Open(imgPath)
+		if err != nil {
+			log.Fatalf("failed to open image file %s: %v", imgPath, err)
+		}
+		defer imgFile.Close()
+
+		img, err := png.Decode(imgFile)
+		if err != nil {
+			continue
+		}
+
+		a.Frames[i].Image = img
+	}
+
+	err = apng.Encode(out, a)
+	if err != nil {
+		log.Fatalf("failed to encode apng: %v", err)
+	}
+
 }

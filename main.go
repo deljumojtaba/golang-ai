@@ -72,6 +72,13 @@ type Maze struct {
 	NumExplored int
 	Debug       bool
 	SearchType  int
+	Animate     bool
+}
+
+func init() {
+	// Ensure the tmp directory is empty at the start of the program.
+	_ = os.Mkdir("./tmp", os.ModePerm)
+	emptyTmp()
 }
 
 func main() {
@@ -81,6 +88,8 @@ func main() {
 
 	flag.StringVar(&maze, "file", "maze.txt", "maze file")
 	flag.StringVar(&searchType, "search", "BFS", "search type")
+	flag.BoolVar(&m.Debug, "debug", false, "enable debug mode")
+	flag.BoolVar(&m.Animate, "animate", false, "generate frames (PNG) in ./tmp instead of a final animation")
 	flag.Parse()
 
 	// Print the chosen file and search type (for now the program
@@ -127,6 +136,12 @@ func main() {
 	}
 
 	fmt.Println("Total nodes explored:", m.NumExplored)
+
+	if m.Animate {
+		// create final animation from frames in ./tmp
+		m.OutputAnimatedImage()
+		fmt.Printf("Frames written to ./tmp (%d frames).\n", m.NumExplored)
+	}
 }
 
 func solveDFS(m *Maze) {

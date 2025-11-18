@@ -86,6 +86,15 @@ func (dfs *DepthFirstSearch) Solve() {
 		dfs.Game.NumExplored++
 		dfs.Game.CurrentNode = currentNode
 
+		// If animation (frames) is enabled, write out the current
+		// maze state as an image in the tmp folder. This will create
+		// a sequence of PNGs that can be used externally to build an
+		// animation. Use NumExplored as a frame counter to keep files
+		// in order.
+		if dfs.Game.Animate {
+			dfs.Game.OutputImage(fmt.Sprintf("tmp/%06d.png", dfs.Game.NumExplored))
+		}
+
 		// Check if we have reached the goal
 		if currentNode.State == dfs.Game.Goal {
 			fmt.Println("Goal reached!")
@@ -100,6 +109,7 @@ func (dfs *DepthFirstSearch) Solve() {
 				} else {
 					break
 				}
+
 			}
 
 			// Reverse the actions and cells to get the correct order
@@ -112,6 +122,9 @@ func (dfs *DepthFirstSearch) Solve() {
 			}
 
 			dfs.Game.Explored = append(dfs.Game.Explored, currentNode.State)
+
+			// Note: frame was already written above when the node was
+			// explored, so no need to write it again here.
 
 			// Stop search immediately after finding the goal.
 			// Previously the code continued searching which could

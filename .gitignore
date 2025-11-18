@@ -44,3 +44,13 @@ thumbs.db
 
 # Add any local maze files you do not want tracked (optional)
 # maze-*.txt
+tmp/
+
+# Generated images and animations
+image.png
+animation.png
+*.mp4
+*.webm
+
+# Frame files (keep directory but ignore content)
+tmp/*

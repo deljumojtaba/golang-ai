@@ -33,10 +33,30 @@ go run . -file=maze.txt -search=dfs
 ```
 
 Flags:
+
 - `-file` : path to the maze file (default: `maze.txt`)
 - `-search` : search algorithm to use. Supported values (case-insensitive): `dfs`, `bfs`, `gbfs`, `astar`, `dijkstra`. Only `dfs` is implemented by default.
+- `-animate` : When set, the solver generates PNG frames for each explored node in the `./tmp` folder. The program does not stitch these into a single animation; use an external tool (e.g. ffmpeg or apngasm) to create an animated file.
+
+How to create an animation from frames
+
+If you want to stitch the frames into an animation, use a tool such as `ffmpeg` or `apngasm`:
+
+- Using `ffmpeg` to create MP4:
+
+```bash
+ffmpeg -framerate 30 -i tmp/%06d.png -c:v libx264 -pix_fmt yuv420p out.mp4
+```
+
+- Using `apngasm` to create APNG:
+
+```bash
+apngasm animation.png tmp/*.png
+```
+
 
 Maze format:
+
 - Characters per cell:
   - `A` — start
   - `B` — goal
@@ -46,7 +66,7 @@ Maze format:
 
 ## Example output
 
-```
+```text
 Maze file: maze.txt
 Search type: dfs
 Goal is at: {0 2}
